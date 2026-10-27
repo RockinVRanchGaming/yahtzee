@@ -441,6 +441,12 @@ html,body{background:radial-gradient(ellipse at 50% 30%,#2a211b 0%,#0e0b09 80%) 
 .sheet .seg button{color:var(--muted)}
 .sheet .step button,.sheet .chipbtn{color:var(--btn)}
 .sheet .go{color:var(--btn-ink)}
+
+/* landscape: keep every row the same height, controls compact */
+.row.ybrow,.ybrow button{min-height:0}
+.ybm,.ybp{max-height:72px}
+html,body{height:var(--ah,100dvh)}
+.app{height:var(--ah,100dvh)}
 </style>
 <div class="app">
   <div class="topbar"><div class="totals" id="totals"></div><div class="status" id="status" role="status" aria-live="polite"></div><div id="grand"></div></div>
@@ -1013,7 +1019,9 @@ html,body{background:radial-gradient(ellipse at 50% 30%,#2a211b 0%,#0e0b09 80%) 
     var vv = window.visualViewport, iw = Math.round((vv && vv.scale === 1 ? vv.width : 0) || window.innerWidth), ih = Math.round((vv && vv.scale === 1 ? vv.height : 0) || window.innerHeight);
     document.documentElement.style.setProperty('--ah', Math.round(window.innerHeight) + 'px'); document.documentElement.style.setProperty('--vh', (ih / 100) + 'px'); document.documentElement.style.setProperty('--vw', (iw / 100) + 'px');
   }
-  window.addEventListener('resize', fit); window.addEventListener('orientationchange', function () { setTimeout(fit, 150); });
+  function refit() { fit(); [60, 200, 450, 900].forEach(function (ms) { setTimeout(fit, ms); }); }
+  window.addEventListener('resize', refit); window.addEventListener('orientationchange', refit); window.addEventListener('pageshow', refit);
+  try { if (window.visualViewport) window.visualViewport.addEventListener('resize', fit); if (screen.orientation) screen.orientation.addEventListener('change', refit); } catch (e) {}
   fit(); applyTheme(); paintSettings(); wake(); render();
 
   /* splash screen: stays until tapped, then plays the clip and fades away */
