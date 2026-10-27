@@ -338,27 +338,73 @@ body{min-height:100vh}
 .sheet{max-height:92%;overflow:auto}
 .cap2{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:6px 4px -6px}
 #rot-less{display:none}
+
+/* ===== One-page layout: nothing scrolls ===== */
+html,body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+.app{position:absolute;inset:0;max-width:none;margin:0;padding:max(6px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;height:100%}
+.topbar{display:flex;align-items:center;gap:8px;flex:none;min-height:50px}
+.topbar .totals{display:flex;gap:8px;align-items:center}
+.topbar .status{flex:1;text-align:center;font-size:13px;min-height:0}
+.topbar .status.over{margin:0;padding:3px 8px;gap:8px;justify-content:center;flex-wrap:nowrap}
+.topbar .status.over .gt1{font-size:14px;letter-spacing:.04em}
+.topbar .status.over button{min-height:30px;padding:0 10px;font-size:13px}
+.topbar .gt{height:48px;min-width:48px}
+.topbar .gt.total{min-width:84px;font-size:30px}
+.topbar .gt.best{min-width:54px;font-size:22px}
+.gt.back{width:48px;padding:0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1 1 0;min-height:0;align-items:stretch!important}
+.band{display:flex;flex-direction:column;min-height:0;padding:5px 5px 6px}
+.band h3{margin:0 0 3px 3px;font-size:10px;flex:none}
+.band .rows{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:4px}
+.row{flex:1 1 0;min-height:0;max-height:60px;padding:0 8px;font-size:clamp(12px,3.4vw,16px);line-height:1.05}
+.row .sc{font-size:clamp(16px,4.6vw,22px);min-width:0}
+.row .nm small{font-size:9px}
+.row .sc.sg{padding:1px 7px;min-width:0;font-size:clamp(15px,4.2vw,20px)}
+.row.sub{flex:.62 1 0;font-size:clamp(11px,3vw,14px)}
+.row.sub .sc{font-size:clamp(14px,4vw,18px)}
+.row.sub .nm small{display:block;margin:0}
+.row.ybrow{flex:1 1 0;gap:4px}
+.ybm{width:38px}.ybp{padding:0 8px;font-size:clamp(12px,3.4vw,16px)}.ybp .sc{font-size:clamp(16px,4.6vw,22px)}
+.bottom{flex:none;display:flex;flex-direction:column;gap:4px}
+.bottom .sum{justify-content:center;font-size:12px;min-height:16px;gap:2px 10px}.bottom .sum b{font-size:14px}
+.bottom .tdice{display:flex;justify-content:center;gap:clamp(6px,2.4vw,16px);padding:2px 0 14px;background:var(--tray);border-radius:10px}
+.pd.yz{--ds:min(52px,calc((var(--vw)*100 - 90px)/5),calc(var(--vh)*7.2))}
+.bottom .btns{display:flex;align-items:center;gap:8px}
+.bottom .btns .rb{width:44px;height:44px;flex:none}
+.bottom .btns .rb.bare{width:46px;height:46px}
+.bottom .btns #bDice.bare{width:60px}
+.bottom .btns .rollbtn{flex:1;min-height:44px;justify-content:center;font-size:18px;padding:0 10px}
+@media (orientation:landscape) and (max-height:560px){
+  .app{display:grid;grid-template-columns:minmax(0,1fr) 270px;grid-template-rows:auto minmax(0,1fr);column-gap:8px;row-gap:6px}
+  .cols{grid-column:1;grid-row:1 / span 2;height:100%;grid-template-rows:minmax(0,1fr)}
+  .topbar{grid-column:2;grid-row:1;flex-wrap:wrap;justify-content:space-between}
+  .bottom{grid-column:2;grid-row:2;justify-content:flex-end}
+  .bottom .tdice{flex-wrap:nowrap;gap:5px;padding-inline:4px}
+  .pd.yz{--ds:min(44px,calc(var(--vh)*11));flex:none}
+  .row{max-height:none;font-size:clamp(12px,2vw,16px)}
+  .row .sc{font-size:clamp(15px,2.6vw,22px)}
+  .row.sub{font-size:clamp(11px,1.8vw,14px)}
+  .bottom .btns{gap:4px}.bottom .btns .rb{width:38px;height:38px}.bottom .btns .rb.bare{width:40px;height:40px}.bottom .btns #bDice.bare{width:48px}
+  .bottom .btns .rollbtn{font-size:15px;padding:0 6px;white-space:nowrap;min-height:38px;min-width:0}
+}
 </style>
 <div class="app">
+  <div class="topbar"><div class="totals" id="totals"></div><div class="status" id="status" role="status" aria-live="polite"></div><div id="grand"></div></div>
   <div class="cols">
-    <section class="band up" aria-label="Upper section"><h3>UPPER SECTION</h3><div class="rows" id="upRows"></div></section>
-    <section class="band lo" aria-label="Lower section"><h3>LOWER SECTION</h3><div class="rows" id="loRows"></div></section>
+    <section class="band up" aria-label="Upper section"><h3>UPPER</h3><div class="rows" id="upRows"></div></section>
+    <section class="band lo" aria-label="Lower section"><h3>LOWER</h3><div class="rows" id="loRows"></div></section>
   </div>
-  <div class="strip">
+  <div class="bottom">
+    <div class="sum" id="sum"></div>
+    <div class="tdice" id="diceRow" aria-live="polite"></div>
     <div class="btns">
       <button class="rb bare" id="bSet" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="gGear" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--set-a)"/><stop offset="1" style="stop-color:var(--set-b)"/></linearGradient></defs><path fill="url(#gGear)" stroke="url(#gGear)" stroke-width="1.1" stroke-linejoin="round" fill-rule="evenodd" d="M20.04 10.37 L22.32 10.70 L22.32 13.30 L20.04 13.63 A8.20 8.20 0 0 1 18.83 16.53 L20.21 18.38 L18.38 20.21 L16.53 18.83 A8.20 8.20 0 0 1 13.63 20.04 L13.30 22.32 L10.70 22.32 L10.37 20.04 A8.20 8.20 0 0 1 7.47 18.83 L5.62 20.21 L3.79 18.38 L5.17 16.53 A8.20 8.20 0 0 1 3.96 13.63 L1.68 13.30 L1.68 10.70 L3.96 10.37 A8.20 8.20 0 0 1 5.17 7.47 L3.79 5.62 L5.62 3.79 L7.47 5.17 A8.20 8.20 0 0 1 10.37 3.96 L10.70 1.68 L13.30 1.68 L13.63 3.96 A8.20 8.20 0 0 1 16.53 5.17 L18.38 3.79 L20.21 5.62 L18.83 7.47 A8.20 8.20 0 0 1 20.04 10.37 zM12 8.1a3.9 3.9 0 1 0 0 7.8 3.9 3.9 0 1 0 0-7.8z"/><path fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7" d="M7.2 6.2A7.4 7.4 0 0 1 12 4.6"/></svg></button>
       <button class="rb" id="bReset" type="button" aria-label="Reset the card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
       <button class="rb" id="bSound" type="button" aria-label="Sound on or off" aria-pressed="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z"/><path class="wv" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke-linecap="round" stroke-width="2.2"/><path class="mx" d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke-linecap="round" stroke-width="2.4"/></svg></button>
       <button class="rb bare" id="bDice" type="button" aria-label="Roll the dice"><svg viewBox="0 0 34 26" aria-hidden="true"><defs><linearGradient id="gDie" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--dce-a)"/><stop offset="1" style="stop-color:var(--dce-b)"/></linearGradient></defs><g transform="rotate(-12 10 14)"><rect x="2.5" y="6" width="15" height="15" rx="3.6" fill="#FFFFFF"/><circle cx="6.3" cy="9.8" r="1.35" fill="#1D1D26"/><circle cx="10" cy="13.5" r="1.35" fill="#1D1D26"/><circle cx="13.7" cy="17.2" r="1.35" fill="#1D1D26"/></g><g transform="rotate(10 23.5 12.5)"><rect x="16" y="5" width="15" height="15" rx="3.6" fill="url(#gDie)"/><circle cx="19.8" cy="8.8" r="1.35" fill="#FFFFFF"/><circle cx="27.2" cy="8.8" r="1.35" fill="#FFFFFF"/><circle cx="23.5" cy="12.5" r="1.35" fill="#FFFFFF"/><circle cx="19.8" cy="16.2" r="1.35" fill="#FFFFFF"/><circle cx="27.2" cy="16.2" r="1.35" fill="#FFFFFF"/></g></svg></button>
-      <button class="rb" id="bEye" type="button" hidden aria-label="Hide scores" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/><path class="sl" d="M4 4l16 16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span class="el">HIDE</span></button>
+      <button class="rollbtn" id="roll" type="button">Roll</button>
     </div>
-    <div class="totals" id="totals"></div>
   </div>
-  <div class="tray" id="tray" hidden>
-    <div class="tdice" id="diceRow" aria-live="polite"></div>
-    <div class="tctl"><button class="rollbtn" id="roll" type="button">Roll</button><div class="sum" id="sum"></div></div>
-  </div>
-  <div class="status" id="status" role="status" aria-live="polite"></div>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -391,7 +437,6 @@ body{min-height:100vh}
     <div class="list">
       <div class="li"><span>Dark mode</span><div class="seg" role="group" aria-label="Dark mode"><button type="button" data-theme-set="auto">Auto</button><button type="button" data-theme-set="light">Light</button><button type="button" data-theme-set="dark">Dark</button></div></div>
       <div class="li"><span>Show dice</span><button class="sw" id="swDice" type="button" role="switch" aria-checked="true" aria-label="Show dice"></button></div>
-      <div class="li"><span>Hide scores during play</span><button class="sw" id="swHide" type="button" role="switch" aria-checked="true" aria-label="Hide scores during play"></button></div>
       <div class="li"><span>Vibration</span><button class="sw" id="swVib" type="button" role="switch" aria-checked="true" aria-label="Vibration"></button></div>
       <div class="li"><span>Keep screen on</span><button class="sw" id="swWake" type="button" role="switch" aria-checked="true" aria-label="Keep screen on"></button></div>
     </div>
@@ -439,7 +484,7 @@ body{min-height:100vh}
   var stats = { best: 0, games: 0 }, st0 = load(K_STATS); if (st0 && typeof st0.best === 'number' && typeof st0.games === 'number') stats = st0;
 
   /* ---------- settings ---------- */
-  var DEF = { sound: true, vib: true, voice: true, voiceName: '', vstyle: 'smooth', wake: false, dice: true, hideScores: false, banter: true, autoUpdate: true, theme: 'auto',
+  var DEF = { sound: true, vib: true, voice: true, voiceName: '', vstyle: 'smooth', wake: false, dice: true, banter: true, autoUpdate: true, theme: 'auto',
     joker: 'forced', yBonus: 100, upperBonus: 35, upperAt: 63, fh: 25, ss: 30, ls: 40, yz: 50 };
   var PRESETS = {
     official: { joker: 'forced', yBonus: 100, upperBonus: 35, upperAt: 63, fh: 25, ss: 30, ls: 40, yz: 50 },
@@ -666,7 +711,7 @@ body{min-height:100vh}
     $('diceRow').innerHTML = h;
     $('roll').textContent = rolls >= 3 ? 'No rolls left' : (rolls === 0 ? 'Roll' : 'Roll again');
     $('roll').disabled = rolling || rolls >= 3;
-    $('sum').innerHTML = !vals ? '<span>Tap Roll. Tap a die to hold it.</span>' : '<span>Roll <b>' + rolls + '</b> of 3</span>' + (isYz(vals) ? '<span class="yzmsg">Yahtzee!</span>' : '');
+    $('sum').innerHTML = !vals ? '<span>Tap Roll. Tap a die to hold it.</span>' : '<span>Roll <b>' + rolls + '</b> of 3. Tap a die to hold it.</span>' + (isYz(vals) ? '<span class="yzmsg">Yahtzee!</span>' : '');
   }
   function newTurn() { dice = null; held = [0, 0, 0, 0, 0]; rolls = 0; sug = null; }
   function doRoll() {
@@ -703,7 +748,7 @@ body{min-height:100vh}
     return '<div class="row sub ' + (cls || '') + '"><span class="nm">' + name + (hint ? '<small>' + hint + '</small>' : '') + '</span><span class="sc">' + (mask ? MINI : val) + '</span></div>';
   }
   function render() {
-    var t = calc(), mask = settings.hideScores && !complete(), i, up = '', lo = '', bestKey = '', bestV = 0;
+    var t = calc(), mask = false, i, up = '', lo = '', bestKey = '', bestV = 0;
     if (sug && !mask) {
       ['up', 'lo'].forEach(function (sec) { sug[sec].forEach(function (v, k) { if (v !== undefined && v !== null && v > bestV) { bestV = v; bestKey = sec + k; } }); });
     }
@@ -721,17 +766,16 @@ body{min-height:100vh}
     h += bestArmed
       ? '<button type="button" class="gt best armed" id="bBest" aria-label="Tap again to reset best score and games"><b>RESET?</b><span class="games">' + stats.games + '</span></button>'
       : '<button type="button" class="gt best" id="bBest" aria-label="Best score ' + stats.best + ' in ' + stats.games + ' games. Tap to reset.">' + stats.best + '<small>BEST</small><span class="games">' + stats.games + '</span></button>';
-    h += '<div class="gt total" aria-label="Total score">' + (mask ? MINI : t.total) + '<small>TOTAL</small></div>';
     $('totals').innerHTML = h;
-    var eye = $('bEye'); eye.hidden = complete(); eye.setAttribute('aria-pressed', settings.hideScores ? 'false' : 'true'); eye.setAttribute('aria-label', settings.hideScores ? 'Show scores' : 'Hide scores'); eye.querySelector('.el').textContent = settings.hideScores ? 'SHOW' : 'HIDE';
-    $('tray').hidden = !settings.dice;
+    $('grand').innerHTML = '<div class="gt total" aria-label="Total score">' + t.total + '<small>TOTAL</small></div>';
+    $('diceRow').hidden = $('roll').hidden = $('sum').hidden = !settings.dice;
     if (settings.dice) drawDice(dice);
     var stt = $('status');
     if (complete()) {
       stt.className = 'status over';
-      stt.innerHTML = '<span class="gt1">GAME OVER</span><span class="gt2">Final score ' + t.total + '.</span><button type="button" id="newGame">New game</button>';
+      stt.innerHTML = '<span class="gt1">GAME OVER</span><button type="button" id="newGame">New game</button>';
     } else {
-      stt.className = 'status'; stt.textContent = filled() + ' of 13 boxes filled';
+      stt.className = 'status'; stt.textContent = filled() + ' of 13';
     }
     $('statLine').textContent = 'Best score ' + stats.best + ' in ' + stats.games + (stats.games === 1 ? ' game.' : ' games.') + ' A finished game counts, and so does pressing reset on a card with scores on it.';
     document.title = 'Yahtzee Score Card';
@@ -782,10 +826,10 @@ body{min-height:100vh}
     $('padTitle').textContent = c.name + (cur !== null ? ' (now ' + cur + ')' : '');
     if (s !== undefined && s !== null) h += '<button type="button" class="go fromdice" data-val="' + s + '" data-from="1">' + (s === 0 ? 'Scratch it (0) with these dice' : 'Score ' + s + ' from the dice') + '</button>';
     else if (s === null) h += '<div class="line2">Joker rule: these dice are a Yahtzee, so they have to go in another box. Pick a box that is lit up.</div>';
-    h += '<div class="cap">' + (sec === 'up' ? 'How many ' + c.name.toLowerCase() + '? Tap the points' : 'Or tap the score') + '</div>';
+    h += '<div class="cap">' + (sec === 'up' ? 'How many ' + c.name.toLowerCase() + ' did you roll?' : 'Or tap the score') + '</div>';
     h += '<div class="pads">';
     if (sec === 'up') {
-      for (k = 0; k <= 5; k++) h += '<button type="button" class="pv" data-val="' + (k * c.face) + '">' + (k * c.face) + '<small>' + k + ' &times; ' + c.face + '</small></button>';
+      for (k = 0; k <= 5; k++) h += '<button type="button" class="pv' + (k === 0 ? ' zero' : '') + '" data-val="' + (k * c.face) + '">' + k + '<small>' + (k * c.face) + ' pts</small></button>';
     } else if (c.k === '3k' || c.k === '4k' || c.k === 'ch') {
       h += '<button type="button" class="pv zero" data-val="0">0<small>scratch</small></button>';
       for (k = 5; k <= 30; k++) h += '<button type="button" class="pv" data-val="' + k + '">' + k + '</button>';
@@ -808,7 +852,7 @@ body{min-height:100vh}
     return v + ' pts';
   }
   function paintSettings() {
-    var map = { swSound: 'sound', swVoice: 'voice', swVib: 'vib', swWake: 'wake', swDice: 'dice', swHide: 'hideScores', swBanter: 'banter', swAuto: 'autoUpdate' };
+    var map = { swSound: 'sound', swVoice: 'voice', swVib: 'vib', swWake: 'wake', swDice: 'dice', swBanter: 'banter', swAuto: 'autoUpdate' };
     for (var id in map) $(id).setAttribute('aria-checked', settings[map[id]]);
     $('bSound').setAttribute('aria-pressed', settings.sound);
     $('bDice').setAttribute('aria-pressed', settings.dice);
@@ -828,7 +872,7 @@ body{min-height:100vh}
   document.addEventListener('visibilitychange', wake);
   function saveSet() { store(K_SET, settings); paintSettings(); render(); }
   function setSet(k) { settings[k] = !settings[k]; saveSet(); if (k === 'wake') wake(); if (k === 'sound' && settings.sound) tone(600, 0.08, 'triangle'); if (k === 'vib') buzz(15); }
-  [['swSound', 'sound'], ['swVoice', 'voice'], ['swVib', 'vib'], ['swWake', 'wake'], ['swDice', 'dice'], ['swHide', 'hideScores'], ['swBanter', 'banter'], ['swAuto', 'autoUpdate'], ['bSound', 'sound']].forEach(function (p) {
+  [['swSound', 'sound'], ['swVoice', 'voice'], ['swVib', 'vib'], ['swWake', 'wake'], ['swDice', 'dice'], ['swBanter', 'banter'], ['swAuto', 'autoUpdate'], ['bSound', 'sound']].forEach(function (p) {
     $(p[0]).addEventListener('click', function () { setSet(p[1]); });
   });
   $('selVoice').addEventListener('change', function () { settings.voiceName = $('selVoice').value; saveSet(); say('Full house. Nicely done.'); });
@@ -862,7 +906,6 @@ body{min-height:100vh}
     if (b.id === 'bReset') { resetCard(); return; }
     if (b.id === 'newGame') { resetCard(); return; }
     if (b.id === 'bBack') { undo(); return; }
-    if (b.id === 'bEye') { settings.hideScores = !settings.hideScores; saveSet(); buzz(); tone(settings.hideScores ? 480 : 700, 0.05, 'triangle'); return; }
     if (b.id === 'bBest') {
       if (!bestArmed) { bestArmed = true; clearTimeout(bestT); bestT = setTimeout(function () { bestArmed = false; render(); }, 3500); buzz(); render(); return; }
       clearTimeout(bestT); bestArmed = false; stats = { best: 0, games: 0 }; store(K_STATS, stats); render(); buzz(20); tone(300, 0.12, 'sine'); return;
