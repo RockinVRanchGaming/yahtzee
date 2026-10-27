@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yahtzee Score Card - Rockin' V Ranch Company Gaming</title>
+<meta name="theme-color" content="#ECE7DA"><meta name="apple-mobile-web-app-title" content="Yahtzee">
+<link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" href="icon-192.png"><link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{--bg:#ECE7DA;--ink:#26231C;--muted:#756E5F;--panel:#FBF8F0;--line:#D5CDB9}
+@media (prefers-color-scheme:dark){:root{--bg:#14120D;--ink:#F1EDE0;--muted:#AFA793;--panel:#201D16;--line:#3A3629}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;display:grid;place-items:center;padding:24px 16px}
+main{width:min(440px,100%);text-align:center}
+.ic{width:132px;height:132px;border-radius:30px;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+h1{margin:18px 0 6px;font-size:30px;font-weight:800}
+p{margin:0 0 18px;color:var(--muted);font-size:17px;line-height:1.4}
+.go{display:block;width:100%;min-height:58px;border:0;border-radius:29px;background:linear-gradient(150deg,#5FA35A,#2F6B34);color:#fff;font:800 20px/1 'Nunito',sans-serif;box-shadow:0 4px 10px rgba(0,0,0,.28),inset 0 2px 0 rgba(255,255,255,.5);cursor:pointer}
+.alt{display:inline-block;margin-top:14px;color:var(--muted);font-weight:700;font-size:15px}
+.steps{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:6px 18px;margin:0 0 16px}
+.steps ol{margin:10px 0;padding-left:22px;font-size:17px;line-height:1.5}.steps li{margin:8px 0}
+.steps h2{font-size:16px;margin:12px 0 0;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.shr{display:inline-block;vertical-align:-4px;width:20px;height:22px}
+
+.tabs{display:flex;gap:6px;margin:0 0 12px}
+.tab{flex:1;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--muted);font:800 14px/1.15 'Nunito',sans-serif;cursor:pointer;padding:4px 6px}
+.tab[aria-selected="true"]{background:linear-gradient(150deg,#5FA35A,#2F6B34);color:#fff;border-color:transparent}
+.note{margin:6px 0 12px;font-size:14px;color:var(--muted);line-height:1.4}
+</style></head><body><main>
+<img class="ic" src="icon-512.png" alt="Yahtzee Score Card icon">
+<h1>Yahtzee Score Card</h1>
+<p>Tap the boxes, keep score, roll the dice. Works on any phone.</p><p style="font-size:14px;margin-top:-8px">Rockin' V Ranch Company Gaming</p>
+<button class="go" id="install" type="button" hidden>Install on my phone</button>
+<div class="tabs" role="tablist" aria-label="Choose your phone">
+<button class="tab" role="tab" data-t="saf" type="button">iPhone<br>Safari</button>
+<button class="tab" role="tab" data-t="cri" type="button">iPhone<br>Chrome</button>
+<button class="tab" role="tab" data-t="and" type="button">Android<br>Chrome</button>
+</div>
+<div class="steps" id="saf" hidden><h2>iPhone, Safari</h2><ol><li>Open this page in <b>Safari</b>.</li><li>Tap the Share button <svg class="shr" viewBox="0 0 20 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15V2M6 6l4-4 4 4M4 10H3v12h14V10h-1"/></svg> at the bottom of the screen.</li><li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol></div>
+<div class="steps" id="cri" hidden><h2>iPhone, Chrome</h2><ol><li>Open this page in <b>Chrome</b>.</li><li>Tap the Share button <svg class="shr" viewBox="0 0 20 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15V2M6 6l4-4 4 4M4 10H3v12h14V10h-1"/></svg> at the top right, next to the web address. (If you only see three dots, tap them first.)</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol><p class="note">Don't see Add to Home Screen? Copy this link and open it in Safari instead.</p></div>
+<div class="steps" id="and" hidden><h2>Android, Chrome</h2><ol><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>three dots</b> at the top right.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>), then <b>Install</b>.</li></ol><p class="note">Samsung Internet: tap the menu at the bottom right, then <b>Add page to</b>, then <b>Home screen</b>.</p></div>
+<div class="steps" id="done" hidden><ol><li>Installed. Look for the <b>Yahtzee</b> icon on your home screen.</li></ol></div>
+<a class="alt" href="play.html">Just play in the browser</a>
+</main>
+<script>
+(function(){
+  var ua=navigator.userAgent||'', ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  var chromeIos=/CriOS|FxiOS|EdgiOS/.test(ua), android=/Android/.test(ua);
+  var standalone=window.navigator.standalone||(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches));
+  var btn=document.getElementById('install'),dp=null,ids=['saf','cri','and'];
+  function pick(t){
+    ids.forEach(function(i){document.getElementById(i).hidden=i!==t;});
+    document.getElementById('done').hidden=true;
+    [].forEach.call(document.querySelectorAll('.tab'),function(b){b.setAttribute('aria-selected',b.getAttribute('data-t')===t?'true':'false');});
+  }
+  if(standalone){location.replace('play.html');return;}
+  [].forEach.call(document.querySelectorAll('.tab'),function(b){b.addEventListener('click',function(){pick(b.getAttribute('data-t'));});});
+  pick(ios?(chromeIos?'cri':'saf'):'and');
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;if(!ios){btn.hidden=false;}});
+  window.addEventListener('appinstalled',function(){ids.forEach(function(i){document.getElementById(i).hidden=true;});document.getElementById('done').hidden=false;btn.hidden=true;});
+  btn.addEventListener('click',function(){if(dp){dp.prompt();dp.userChoice.then(function(){dp=null;});}});
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+})();
+</script></body></html>
