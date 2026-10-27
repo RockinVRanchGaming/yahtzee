@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Yahtzee"><meta name="theme-color" content="#ECE7DA">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Yahtzee"><meta name="theme-color" content="#ECE7DA">
 <link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" href="icon-192.png"><link rel="manifest" href="manifest.webmanifest">
 <style>html{color-scheme:light dark}body{margin:0}[hidden]{display:none!important}</style>
 <title>Yahtzee Score Card</title>
@@ -387,6 +387,12 @@ html,body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;overscro
   .bottom .btns{gap:4px}.bottom .btns .rb{width:38px;height:38px}.bottom .btns .rb.bare{width:40px;height:40px}.bottom .btns #bDice.bare{width:48px}
   .bottom .btns .rollbtn{font-size:15px;padding:0 6px;white-space:nowrap;min-height:38px;min-width:0}
 }
+
+/* real-phone fixes: use the measured height, keep clear of the notch and the home bar */
+html,body{height:var(--ah,100%)}
+.app{height:var(--ah,100%);padding:max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.row{max-height:72px}
+@media (orientation:landscape) and (max-height:560px){.row{max-height:none}}
 </style>
 <div class="app">
   <div class="topbar"><div class="totals" id="totals"></div><div class="status" id="status" role="status" aria-live="polite"></div><div id="grand"></div></div>
@@ -957,7 +963,7 @@ html,body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;overscro
   /* ---------- fit ---------- */
   function fit() {
     var vv = window.visualViewport, iw = Math.round((vv && vv.scale === 1 ? vv.width : 0) || window.innerWidth), ih = Math.round((vv && vv.scale === 1 ? vv.height : 0) || window.innerHeight);
-    document.documentElement.style.setProperty('--vh', (ih / 100) + 'px'); document.documentElement.style.setProperty('--vw', (iw / 100) + 'px');
+    document.documentElement.style.setProperty('--ah', Math.round(window.innerHeight) + 'px'); document.documentElement.style.setProperty('--vh', (ih / 100) + 'px'); document.documentElement.style.setProperty('--vw', (iw / 100) + 'px');
   }
   window.addEventListener('resize', fit); window.addEventListener('orientationchange', function () { setTimeout(fit, 150); });
   fit(); applyTheme(); paintSettings(); wake(); render();
