@@ -435,6 +435,12 @@ html,body{background:radial-gradient(ellipse at 50% 30%,#2a211b 0%,#0e0b09 80%) 
 .rollbtn:disabled{filter:saturate(.4) brightness(.8)}
 #bReset,#bSound{background:linear-gradient(150deg,#E8CB82,#A08040);color:#1c140b}
 #bSound[aria-pressed="false"]{filter:saturate(.3) brightness(.7)}
+.sheet{color:var(--ink)}
+.pv{color:var(--ink)}.pv.zero{color:var(--danger)}
+.sheet .x,.sheet .li,.sheet .seg button[aria-pressed="true"]{color:var(--ink)}
+.sheet .seg button{color:var(--muted)}
+.sheet .step button,.sheet .chipbtn{color:var(--btn)}
+.sheet .go{color:var(--btn-ink)}
 </style>
 <div class="app">
   <div class="topbar"><div class="totals" id="totals"></div><div class="status" id="status" role="status" aria-live="polite"></div><div id="grand"></div></div>
