@@ -271,6 +271,45 @@ html, body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hid
   #splash img{width:min(78vmin,560px);height:auto;opacity:0;transform:scale(.94);animation:spImg .8s ease-out .1s forwards;filter:drop-shadow(0 10px 28px rgba(0,0,0,.55))}
   #splash .sk{margin-top:2.2vmin;font:600 clamp(9px,1.7vmin,12px)/1 Georgia,'Times New Roman',serif;letter-spacing:.34em;color:#b89a5e;opacity:0;animation:spIn .8s ease-out 1.2s forwards, spPulse 2.6s ease-in-out 2.2s infinite;text-transform:uppercase}
   @keyframes spImg{to{opacity:1;transform:none}} @keyframes spIn{to{opacity:.55;transform:none}} @keyframes spPulse{0%,100%{opacity:.55}50%{opacity:.25}}
+
+/* layout v2: bigger color rows, score strip right under blue, buttons at the bottom */
+.tile, .lock, .score { height: clamp(60px, calc(var(--vh) * 18), 98px); font-size: clamp(26px, calc(var(--vw) * 4.6), 42px); }
+.score { font-size: clamp(26px, calc(var(--vw) * 4.6), 40px); }
+.score small { font-size: 11px; }
+.strip { flex-wrap: nowrap; align-items: center; margin-top: 2px; padding-right: 10px; }
+.eyecol { flex: none; display: flex; justify-content: flex-end; }
+.btnrow { display: flex; justify-content: center; margin-top: 4px; }
+.btnrow .btns { gap: 18px; }
+
+/* layout v3: colour rows fill the height; strip keeps its on-screen size; bottom buttons smaller */
+.app { --zs: 1; --zb: .72; }
+.tile, .lock, .score { height: clamp(60px, calc(var(--vh) * 40), 150px); font-size: clamp(28px, calc(var(--vh) * 17), 66px); border-radius: 16px; }
+.score { font-size: clamp(30px, calc(var(--vh) * 18), 70px); padding-bottom: 18px; }
+.score small { font-size: clamp(11px, calc(var(--vh) * 4.4), 18px); bottom: 4px; }
+.cells { gap: 10px; }
+.band { padding: 12px 14px 12px 40px; border-radius: 10px; }
+.flag { width: 46px; height: 52px; margin-top: -26px; left: -14px; }
+#bands { gap: 12px !important; }
+.strip, .status, .tray { zoom: var(--zs); }
+.btnrow { zoom: var(--zb); }
+#bEye { border-radius: 10px; width: 54px; height: 54px; }
+#bEye svg { width: 30px; height: 30px; }
+#bEye .el { display: none; }
+.lock { width: 100%; aspect-ratio: auto; border-radius: 0 !important; background: radial-gradient(circle closest-side, var(--tile) 97%, transparent 100%) !important; }
+.lock.mine, .lock.other { background: radial-gradient(circle closest-side, var(--on) 97%, transparent 100%) !important; }
+.lock svg { width: auto; height: 46%; }
+.lock { box-shadow: none !important; border: 0 !important; filter: drop-shadow(0 2px 2px rgba(0,0,0,.22)); }
+.score small { font-size: clamp(12px, calc(var(--vh) * 6.4), 26px) !important; }
+
+.resetset.done { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
+.sheet-inner { padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+
+/* layout v4: a bit more height for the colour rows */
+.tile, .lock, .score { height: clamp(60px, calc(var(--vh) * 46), 176px); font-size: clamp(28px, calc(var(--vh) * 19), 74px); }
+.score { font-size: clamp(30px, calc(var(--vh) * 20), 78px); }
+.band { padding: 9px 12px 9px 40px; }
+#bands { gap: 9px !important; }
+.app { gap: 7px !important; }
 /* ===== Yahtzee overrides ===== */
 html,body{position:static;inset:auto;width:auto;height:auto;overflow:auto;overscroll-behavior:auto}
 body{min-height:100vh}
@@ -663,6 +702,32 @@ html,body{height:var(--ah,100dvh)}
     try { voices = (window.speechSynthesis.getVoices() || []).filter(function (v) { return /^en/i.test(v.lang); }); } catch (e) { voices = []; }
     fillVoices();
   }
+  /* speech: iPhones only let a page talk after a real tap, and the speech engine can stall after the app sleeps.
+     So the first callout waits for the finger to lift, a silent line unlocks speech on the first tap, and a stalled engine is reset. */
+  var spOK = false, spWait = null;
+  function speakNow(u) {
+    var ss = window.speechSynthesis;
+    try { if (ss.paused) ss.resume(); } catch (e) {}
+    if (!spOK) { spWait = u; return; }
+    try { if (ss.speaking || ss.pending) ss.cancel(); } catch (e) {}
+    ss.speak(u);
+    // If the engine is stuck it never starts; give it one reset and retry.
+    var started = false; u.addEventListener('start', function () { started = true; });
+    setTimeout(function () { try { if (!started && !ss.speaking) { ss.cancel(); ss.speak(u); } } catch (e) {} }, 700);
+  }
+  function unlockSpeech() {
+    var ss = window.speechSynthesis; if (!ss || !window.SpeechSynthesisUtterance) return;
+    try {
+      if (ss.paused) ss.resume();
+      if (!spOK) {
+        spOK = true;
+        if (spWait) { var w = spWait; spWait = null; ss.cancel(); ss.speak(w); }
+        else { var z = new SpeechSynthesisUtterance(' '); z.volume = 0; ss.speak(z); }
+      }
+    } catch (e) {}
+  }
+  document.addEventListener('touchend', unlockSpeech, true); document.addEventListener('pointerup', unlockSpeech, true); document.addEventListener('click', unlockSpeech, true); document.addEventListener('keydown', unlockSpeech, true);
+  document.addEventListener('visibilitychange', function () { try { if (document.visibilityState === 'visible') { window.speechSynthesis.cancel(); spOK = false; } } catch (e) {} });
   function say(text, cb) {
     if (!settings.voice || !settings.sound) return;
     try {
@@ -672,8 +737,7 @@ html,body{height:var(--ah,100dvh)}
       var v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; }
       u.rate = vs === 'bright' ? 1.05 : (smooth ? 0.86 : 1); u.pitch = vs === 'bright' ? 1.3 : (smooth ? 0.92 : 1); u.volume = 1;
       if (cb) { var fin = false, once = function () { if (!fin) { fin = true; cb(); } }; u.onend = once; u.onerror = once; setTimeout(once, 7000); }
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
+      speakNow(u);
     } catch (e) { if (cb) cb(); }
   }
   try { window.speechSynthesis.onvoiceschanged = loadVoices; } catch (e) {}
