@@ -552,7 +552,7 @@ html,body{height:var(--ah,100dvh)}
   var stats = { best: 0, games: 0 }, st0 = load(K_STATS); if (st0 && typeof st0.best === 'number' && typeof st0.games === 'number') stats = st0;
 
   /* ---------- settings ---------- */
-  var DEF = { sound: true, vib: true, voice: true, voiceName: '', vstyle: 'smooth', wake: false, dice: true, banter: true, autoUpdate: true, theme: 'auto',
+  var DEF = { sound: true, vib: true, voice: true, voiceName: '', vstyle: 'natural', vs2: true, wake: false, dice: true, banter: true, autoUpdate: true, theme: 'auto',
     joker: 'forced', yBonus: 100, upperBonus: 35, upperAt: 63, fh: 25, ss: 30, ls: 40, yz: 50 };
   var PRESETS = {
     official: { joker: 'forced', yBonus: 100, upperBonus: 35, upperAt: 63, fh: 25, ss: 30, ls: 40, yz: 50 },
@@ -563,6 +563,7 @@ html,body{height:var(--ah,100dvh)}
   function defaults() { var o = {}; for (var k in DEF) o[k] = DEF[k]; return o; }
   var settings = defaults(), se0 = load(K_SET);
   if (se0) for (var key in DEF) { if (se0[key] !== undefined && typeof se0[key] === typeof DEF[key]) settings[key] = se0[key]; }
+  if (se0 && se0.vs2 === undefined && settings.vstyle === 'smooth') settings.vstyle = 'natural'; // one-time switch to the new Natural default
   if (['auto', 'light', 'dark'].indexOf(settings.theme) < 0) settings.theme = 'auto';
   if (['forced', 'free', 'none'].indexOf(settings.joker) < 0) settings.joker = 'forced';
   function presetOf() {
