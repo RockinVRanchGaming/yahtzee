@@ -310,6 +310,16 @@ html, body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hid
 .band { padding: 9px 12px 9px 40px; }
 #bands { gap: 9px !important; }
 .app { gap: 7px !important; }
+
+/* dice tray: its own close button */
+.tray { position: relative; padding: 10px 60px 10px 16px; gap: 8px 18px; }
+.trayx { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(150deg, #8C8576, #4C4639); color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); }
+.trayx svg { width: 20px; height: 20px; }
+.trayx:active { transform: scale(.93); }
+.verbtn{min-height:48px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-weight:800;font-size:16px;color:var(--btn);padding:0 14px;width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.verbtn small{color:var(--muted);font-weight:700;font-size:13px;display:block}
+.sheet .rules h3{margin:12px 0 4px;font-size:15px;color:var(--btn)}.sheet .rules p,.sheet .rules li{font-size:14px;line-height:1.45;margin:0 0 6px;color:var(--ink)}.sheet .rules ul{padding-left:18px;margin:0}
+.sheet .rules table{width:100%;border-collapse:collapse;font-size:14px}.sheet .rules td{padding:5px 4px;border-bottom:1px solid var(--line);color:var(--ink)}.sheet .rules td:last-child{text-align:right;font-weight:800}
 /* ===== Yahtzee overrides ===== */
 html,body{position:static;inset:auto;width:auto;height:auto;overflow:auto;overscroll-behavior:auto}
 body{min-height:100vh}
@@ -493,6 +503,10 @@ html,body{height:var(--ah,100dvh)}
 #turn .ph{animation:turnph 2.4s ease-in-out infinite;transform:rotate(-90deg);height:clamp(40px,14vmin,76px);width:auto}
 @keyframes turnph{0%,25%{transform:rotate(-90deg)}60%,100%{transform:rotate(0)}}
 @media (prefers-reduced-motion:reduce){#turn .ph{animation:none;transform:none}}
+.verbtn{min-height:48px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-weight:800;font-size:16px;color:var(--btn);padding:0 14px;width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.verbtn small{color:var(--muted);font-weight:700;font-size:13px;display:block}
+.sheet .rules h3{margin:12px 0 4px;font-size:15px;color:var(--btn)}.sheet .rules p,.sheet .rules li{font-size:14px;line-height:1.45;margin:0 0 6px;color:var(--ink)}.sheet .rules ul{padding-left:18px;margin:0}
+.sheet .rules table{width:100%;border-collapse:collapse;font-size:14px}.sheet .rules td{padding:5px 4px;border-bottom:1px solid var(--line);color:var(--ink)}.sheet .rules td:last-child{text-align:right;font-weight:800}
 </style>
 <div class="app">
   <div class="topbar"><div class="totals" id="totals"></div><div class="status" id="status" role="status" aria-live="polite"></div><div id="grand"></div></div>
@@ -522,9 +536,22 @@ html,body{height:var(--ah,100dvh)}
   </div>
 </section>
 
+<section class="sheet" id="ruleSheet" aria-label="Rules" hidden>
+  <div class="sheet-inner">
+    <div class="top"><h2>Yahtzee rules</h2><button class="x" type="button" data-close aria-label="Close">&#10005;</button></div>
+    <div class="rules"><h3>Goal</h3><p>Fill all 13 boxes with the best score you can. Highest total wins.</p>
+<h3>Your turn</h3><p>Roll five dice up to three times. Keep any dice you like between rolls. After your last roll you must put a score in one empty box, even if it scores zero (a scratch).</p>
+<h3>Upper section</h3><p>Ones through Sixes: add up only the dice showing that number. Score 63 or more across the upper section (three of each) for a 35-point bonus.</p>
+<h3>Lower section</h3><table><tr><td>Three of a kind</td><td>total of all dice</td></tr><tr><td>Four of a kind</td><td>total of all dice</td></tr><tr><td>Full house (3 + 2)</td><td>25</td></tr><tr><td>Small straight (4 in a row)</td><td>30</td></tr><tr><td>Large straight (5 in a row)</td><td>40</td></tr><tr><td>Yahtzee (5 of a kind)</td><td>50</td></tr><tr><td>Chance</td><td>total of all dice</td></tr></table>
+<h3>Extra Yahtzees</h3><p>Each extra Yahtzee after a 50 in the Yahtzee box earns a 100-point bonus. Under the Joker rule, the extra Yahtzee must go in its upper box if that box is open; otherwise it can fill any lower box at full value (full house 25, straights 30 and 40).</p>
+<p>The bonus amounts and joker rule follow the rule set picked in Settings.</p></div>
+    <button class="chipbtn" id="rulesBack" type="button" style="min-height:46px">Back to settings</button>
+  </div>
+</section>
 <section class="sheet" id="setSheet" aria-label="Settings" hidden>
   <div class="sheet-inner">
     <div class="top"><h2>Settings</h2><button class="x" type="button" data-close aria-label="Close">&#10005;</button></div>
+    <button class="verbtn" id="openRules" type="button"><span>How to play &amp; scoring<small>The rules for Yahtzee</small></span><span>Open &rsaquo;</span></button>
     <div class="cap2">Rules</div>
     <div class="list">
       <div class="li"><span>Version</span><div class="seg" role="group" aria-label="Rules version"><button type="button" data-preset="official">Official</button><button type="button" data-preset="family">Family</button><button type="button" data-preset="simple">Simple</button></div></div>
@@ -949,6 +976,11 @@ html,body{height:var(--ah,100dvh)}
   var openSheet = null;
   var shownAt = 0;
   function show(id) { hide(); shownAt = Date.now(); $('scrim').hidden = false; $(id).hidden = false; openSheet = id; var f = $(id).querySelector('button'); if (f) f.focus(); }
+
+  // Rules page, opened from Settings
+  (function () { var o = document.getElementById('openRules'), bk = document.getElementById('rulesBack');
+    if (o) o.addEventListener('click', function () { show('ruleSheet'); });
+    if (bk) bk.addEventListener('click', function () { show('setSheet'); }); })();
   function hide() { if (openSheet) { $(openSheet).hidden = true; } $('scrim').hidden = true; openSheet = null; }
   $('scrim').addEventListener('click', function () { if (Date.now() - shownAt > 450) hide(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
