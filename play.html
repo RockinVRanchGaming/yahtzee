@@ -585,6 +585,7 @@ html,body{height:var(--ah,100dvh)}
       <div class="li"><span>Keep screen on</span><button class="sw" id="swWake" type="button" role="switch" aria-checked="true" aria-label="Keep screen on"></button></div>
     </div>
     <div class="cap2">Sound and banter</div>
+    <div class="list"><div class="li"><span>Ribbing<small class="hint2" id="heatHint" style="display:block"></small></span><div class="seg" role="group" aria-label="Ribbing"><button type="button" data-heat-set="gentle">Gentle</button><button type="button" data-heat-set="family">Family</button><button type="button" data-heat-set="savage">Savage</button></div></div></div>
     <div class="list">
       <div class="li"><span>Sound</span><button class="sw" id="swSound" type="button" role="switch" aria-checked="true" aria-label="Sound"></button></div>
       <div class="li"><span>Voice callouts</span><button class="sw" id="swVoice" type="button" role="switch" aria-checked="true" aria-label="Voice callouts"></button></div>
@@ -791,6 +792,107 @@ var RVBook = (function () {
   return { K: K, owner: owner, setOwner: setOwner, addGame: addGame, updateGame: updateGame, removeGame: removeGame, games: games, players: players, nameOf: nameOf,
     rename: rename, merge: merge, removePlayer: removePlayer, stats: stats, headToHead: headToHead, suggest: suggest, lastTable: lastTable, csv: csv, exportJSON: exportJSON, importJSON: importJSON, count: count, seenToast: seenToast, markToast: markToast, norm: norm };
 })();
+/* Rockin' V ribbing dial: Gentle / Family / Savage. Shared by every game on the phone (rv-heat-v1). */
+/* Rockin' V ribbing dial: Gentle / Family / Savage. Shared by every game on the phone (rv-heat-v1). */
+/* Rockin' V ribbing dial: Gentle / Family / Savage. Shared by every game on the phone (rv-heat-v1). */
+var RVHeat = (function () {
+  var K = 'rv-heat-v1', LEVELS = ['gentle', 'family', 'savage'];
+  function get() { try { var v = localStorage.getItem(K); return LEVELS.indexOf(v) >= 0 ? v : 'savage'; } catch (e) { return 'savage'; } }
+  function set(v) { if (LEVELS.indexOf(v) < 0) return; try { localStorage.setItem(K, v); } catch (e) {} }
+  /* lines that name somebody at the table are Savage; everything else is Family (jabs) or Gentle (good news) */
+  var NAMES = /\b(Stephen|Steven|Steve|Christine|Chris|Mom|Mother|Jeff|Shannon|Chad|Dad|Grandma|Grandpa)\b/i;
+  var POSITIVE = { brag: 1, table: 1, big: 1, yahtzee: 1, bonus: 1, ybonus: 1, out: 1, deal: 1, pick: 1 };
+  function heatOf(x, kind) {
+    if (x.h) return x.h;
+    if (NAMES.test(x.t || '')) return 's';
+    return POSITIVE[kind] ? 'g' : 'f';
+  }
+  function allowed(level) { return level === 'gentle' ? { g: 1 } : level === 'family' ? { g: 1, f: 1 } : { g: 1, f: 1, s: 1 }; }
+  function fill(t, who, winner) {
+    return String(t).replace(/\{player\}/g, who || 'Somebody').replace(/\{winner\}/g, winner || who || 'Somebody');
+  }
+  /* original Rockin' V lines, nobody's property but ours */
+  var EXTRA = {
+    brag: [
+      { t: '{player}. Write that one down. Oh wait, we did.', h: 'g' },
+      { t: 'Somebody check {player} for loaded dice.', h: 'g' },
+      { t: '{player} is making this look easy, which is rude.', h: 'g' },
+      { t: 'That was a professional move, {player}. Call the papers.', h: 'g' },
+      { t: '{player} came to play. The rest of you came to watch.', h: 'g' },
+      { t: 'Smooth as a river rock, {player}.', h: 'g' },
+      { t: '{player} just put the whole table on notice.', h: 'g' },
+      { t: 'Frame it. {player} earned that one.', h: 'g' },
+      { t: '{player} is on fire. Someone fetch a hose.', h: 'g' },
+      { t: 'That is how it is done, {player}. Class dismissed.', h: 'g' },
+      { t: '{player} would like everyone to notice. Everyone has noticed.', h: 'g' },
+      { t: 'Bow down. {player} is having a night.', h: 'g' },
+      { t: 'Hot hand alert. {player} is cooking.', h: 'g' },
+      { t: '{player}, that was a thing of beauty.', h: 'g' },
+      { t: 'Take a victory lap, {player}. A short one.', h: 'g' },
+      { t: '{player} just did the math and the math said yes.', h: 'g' },
+      { t: 'Big night for {player}. Small night for everyone else.', h: 'g' },
+      { t: '{player} is playing chess. The rest of us brought checkers.', h: 'g' },
+      { t: 'Somebody is going to brag about this one for a week. Hi, {player}.', h: 'g' },
+      { t: 'Ranch champion material right there, {player}.', h: 'g' }
+    ],
+    table: [
+      { t: 'Close game. Nobody breathe.', h: 'g' },
+      { t: 'The table has gone quiet. That is never good.', h: 'g' },
+      { t: 'Plot twist incoming. Probably.', h: 'g' },
+      { t: 'Everybody is still in this. Allegedly.', h: 'g' },
+      { t: 'The dice have opinions tonight.', h: 'g' },
+      { t: 'Somebody refill the snacks. This could take a while.', h: 'g' },
+      { t: 'Nothing personal. All of it is personal.', h: 'g' },
+      { t: 'That round will be discussed at the next holiday.', h: 'g' },
+      { t: 'Scorekeeper, stay sharp. People are watching.', h: 'g' },
+      { t: 'Momentum has entered the room.', h: 'g' },
+      { t: 'Tight at the top. Loose at the bottom.', h: 'g' },
+      { t: 'And the crowd murmurs politely.', h: 'g' },
+      { t: 'This is anyone’s game. Mostly.', h: 'g' },
+      { t: 'Steady hands, everybody.', h: 'g' },
+      { t: 'Well. That happened.', h: 'g' }
+    ],
+    normal: [
+      { t: '{player}, that was a cry for help.', h: 'f' },
+      { t: '{player} rolled that like it owed them money.', h: 'f' },
+      { t: 'Bold strategy, {player}. Let’s see if it pays off. It won’t.', h: 'f' },
+      { t: '{player} is building character tonight.', h: 'f' },
+      { t: 'The dice saw {player} coming.', h: 'f' },
+      { t: '{player}, the scoreboard would like a word.', h: 'f' },
+      { t: 'Somebody get {player} a participation ribbon.', h: 'f' },
+      { t: '{player} is playing the long game. Very long.', h: 'f' },
+      { t: 'That was a choice, {player}.', h: 'f' },
+      { t: '{player} is keeping everyone else humble by comparison. Backwards.', h: 'f' },
+      { t: 'Deep breaths, {player}. It is only a game you are losing.', h: 'f' },
+      { t: '{player}, your luck called. It is running late.', h: 'f' }
+    ],
+    fail: [
+      { t: '{player}, the dice have filed a complaint.', h: 'f' },
+      { t: 'Swing and a miss, {player}.', h: 'f' },
+      { t: '{player} just donated that turn to charity.', h: 'f' },
+      { t: 'Nothing to see here, {player}. Literally nothing.', h: 'f' },
+      { t: 'That roll had potential, {player}. Had.', h: 'f' },
+      { t: '{player}, shake them harder next time. Or softer. Something.', h: 'f' }
+    ],
+    end: [
+      { t: 'It goes to {winner}, who will not let anyone forget it.', h: 'g' },
+      { t: 'Rematch is mandatory. Congratulations, {winner}.', h: 'g' },
+      { t: 'Final answer: {winner}. Everybody shake hands.', h: 'g' },
+      { t: 'The record book has been notified. Nice work, {winner}.', h: 'g' },
+      { t: 'Good game, everybody. Especially {winner}.', h: 'g' },
+      { t: 'Somebody deal the next one. {winner} is insufferable now.', h: 'g' }
+    ]
+  };
+  function merge(LINES) {
+    var k; for (k in EXTRA) {
+      var have = {}; (LINES[k] || []).forEach(function (x) { have[typeof x === 'string' ? x : x.t] = 1; });
+      LINES[k] = (LINES[k] || []).concat(EXTRA[k].filter(function (x) { return !have[x.t]; }));
+    }
+    return LINES;
+  }
+  return { get: get, set: set, heatOf: heatOf, allowed: allowed, fill: fill, merge: merge, LEVELS: LEVELS, POSITIVE: POSITIVE };
+})();
+
 
 </script>
 <script>
@@ -974,7 +1076,8 @@ var RVBook = (function () {
 
   /* ---------- banter ---------- */
   var LINES = {"normal": ["Stephen, that one's got your name on it.", "Stephen is plotting. I can hear it.", "Stephen, it's a game. Put the knife down.", "Nothing personal, Stephen. Okay, a little personal.", "Stephen smiles when he ruins your day.", "Christine plays it right down the middle.", "Give Christine a minute. She's thinking.", "Steady Christine. Never too hot, never too cold.", "Christine, the diplomat.", "Christine says she's not competitive. Sure.", "Christine is quietly winning.", "Christine is playing the long game.", "Mom always liked the little brother best.", "Mom always liked the big brother best.", "Tell Mom I'm winning.", "Mom likes me best. Just saying.", "Mom said I was the smart one.", "Mom's favorite changes every round.", "Mom is rooting for me. Obviously.", "Mom would be so proud. Of me.", "Mom's keeping score. Of who her favorite is.", "Mom loved my report card.", "Mom taught me how to win.", "Mom's watching. Behave.", "Too easy.", "Another one for the champ.", "And I'm not even trying.", "I'd feel bad, but I don't.", "The master at work.", "Humble as always.", "Winning looks good on me.", "Don't hate the player.", "You're welcome, everybody.", "Anyone? Anyone? Tell them how good I am.", "Roll the bones.", "Snake eyes. Almost.", "The dice gods are listening.", "Come on, lucky seven.", "Read 'em and weep.", "Not bad. Not bad at all.", "Pencil in that one.", "That's a keeper.", "No take-backs.", "Bold move.", "Fifteen two, fifteen four.", "Pegging along nicely.", "Go.", "And a pair is two.", "Muggins!", "That's a twenty-nine hand.", "As you wish.", "Hello, my name is Inigo Montoya.", "You can't handle the truth.", "Show me the money.", "I'll be back.", "May the odds be ever in your favor.", "Here's looking at you, kid.", "I feel the need, the need for speed.", "Say hello to my little friend.", "You're gonna need a bigger boat.", "Yippee-ki-yay.", "There's no crying in baseball.", "To infinity and beyond.", "I am your father.", "Come on down!", "I'll take Dice for six hundred.", "What is a lucky roll?", "Let's make a deal.", "I'd like to buy a vowel.", "The price is right.", "Bob Barker would be proud.", "Nice try.", "Lucky.", "Skill. Pure skill.", "Sit down, I'm not done.", "Must be nice.", "That's just rude.", "Somebody call a doctor. That was sick.", "Did you see that? Of course you did.", "Rigged.", "I smell a comeback.", "Don't get cocky.", "Stay humble. I won't.", "Pressure makes diamonds.", "That's what I call a power move.", "Hold my pencil.", "Check the rulebook. I'll wait.", "You just got Qwixxed.", "Cold as ice.", "Okay, okay. I see you.", "The comeback is real.", "That hurt me more than it hurt you.", "Brace yourselves.", "Do not look at the scoreboard.", "Respect.", "Game on.", "Welcome to Two Prickly Pear Road.", "Prickly Pear Road, where the dice are sharp and so are the players.", "Don't get pricked.", "Big Sky Country, small pencil marks.", "Montana City rules apply.", "Keep it down, you'll scare the elk.", "Somewhere out there, a coyote is judging that pick.", "Montana nice, until the cards come out.", "Out here, we settle it with dice.", "The nearest witness is a deer.", "Cold outside, hot at the table.", "Prickly pear: sweet fruit, sharp edges. Just like Stephen.", "Even the cactus is rooting for me.", "Two Prickly Pear Road. Home field advantage.", "Big sky, big talk.", "May the Force be with you.", "These aren't the droids you're looking for.", "The Force is strong with this one.", "Help me, Obi-Wan Kenobi. You're my only hope.", "This is the way.", "Hello there.", "Laugh it up, fuzzball.", "I know.", "Now this is podracing!", "Great, kid. Don't get cocky.", "Let the Wookiee win.", "Who says Butt Munch?", "Is Butt Munch even a word, Steven?"], "teen": ["Ugh. Whatever.", "This is so unfair.", "I literally can't even.", "Can I use your card?", "Dad. Dad. Dad. Dad.", "Are we done yet? I have plans.", "That's so cringe.", "I'm literally dying right now.", "My phone is at two percent. Hurry up.", "This game is so boring. Roll again.", "Can you drive me to the mall?", "You're embarrassing me.", "I'm not mad. I'm just disappointed. Fine, I'm mad.", "Whatever, I'm calling Mom.", "It's not my fault.", "Do you know how much I need new shoes?", "I need a bigger allowance for this.", "No. Just no.", "Fine. Be that way.", "Can we order food? I'm starving.", "Wow. Just wow.", "Dad, you're so old."], "fail": ["Mom's going to hear about this.", "Don't make me call Mom.", "Somebody's not getting a birthday card.", "Mom says share the dice.", "Houston, we have a problem.", "Check the dice.", "Somebody's cheating. Probably Stephen.", "Inconceivable!", "You keep using that word.", "Is that your final answer?", "Big bucks, no whammies!", "Blow on them first.", "No take-backs.", "I've got a bad feeling about this.", "It's a trap!", "Never tell me the odds.", "You were the chosen one!", "Do or do not. There is no try."], "yahtzee": ["Yahtzee! Pay up.", "Yahtzee! Somebody check those dice.", "Hold the phone. Yahtzee.", "Five of a kind. Mom is so proud.", "That's a Yahtzee, and Stephen is furious.", "Stephen demands a recount.", "Nobody saw that coming. Except me.", "Call the newspaper.", "That's not luck. That's talent.", "Quick, take a picture.", "Somebody tell Mom.", "Let me recheck the dice. Nope, still a Yahtzee.", "Well, shut my mouth.", "Y'all just got Yahtzeed.", "Shazam!", "Who doubts the Rockin' V now?", "Hallelujah!", "I'm king of the world!", "Winner, winner, chicken dinner.", "It's alive! It's alive!", "Christine saw that coming. Quietly."], "bonus": ["Upper bonus! Thank you very much.", "The upper section bonus. Easy money.", "Bonus time, baby.", "Look at that bonus roll in.", "Shannon is checking my math. It's right.", "Stephen has never earned that bonus in his life.", "Christine quietly takes the bonus.", "The bonus is in the bag.", "Ka-ching!", "Show me the money.", "Mom would say I earned that one."], "ybonus": ["Another Yahtzee? Are you kidding me?", "Two Yahtzees. Somebody check his sleeves.", "Stephen, put the dice down.", "That's just showing off.", "Call the casino.", "Unbelievable. Do it again.", "Hit me with another.", "Mom is going to frame this card."], "end": ["Game over. Count it up.", "Good game, everybody. Except Stephen.", "Put the dice down. Step away from the table.", "And that's a wrap.", "Pencils down.", "Nobody tell Mom who won.", "Winner buys dinner.", "Loser does the dishes.", "Rematch? Obviously.", "Best two out of three. Say it with me.", "Fine. One more game.", "That's all, folks.", "Well, that was fun. Let's do it again."]};
-  var lastLine = '', ban = load(K_BAN) || {};
+  RVHeat.merge(LINES);
+  var rvWho = '', rvWinner = '', lastLine = '', ban = load(K_BAN) || {};
   if (!ban.used || typeof ban.used !== 'object') ban.used = {};
   function gap() { return 7 + Math.floor(Math.random() * 5); }
   if (typeof ban.left !== 'number') ban.left = 2 + Math.floor(Math.random() * 10);
@@ -987,14 +1090,18 @@ var RVBook = (function () {
   }
   function nextLine(g) {
     var used = ban.used[g] || (ban.used[g] = []);
-    var all = (LINES[g] || []).map(ent).filter(inSeason);
+    var lvl = RVHeat.get(), okH = RVHeat.allowed(lvl);
+    var all = (LINES[g] || []).map(ent).filter(inSeason).filter(function (x) { return okH[RVHeat.heatOf(x, g)]; });
+    if (!all.length) { if (g === 'table' || g === 'brag') return ''; return nextLine(/^(big|yahtzee|bonus|ybonus|out|deal|pick|lock)$/.test(g) ? 'brag' : 'table'); }
     var pool = all.filter(function (x) { return used.indexOf(x.t) < 0; }), line;
     if (!pool.length) { used.length = 0; pool = all.slice(); }
     if (!pool.length) return '';
     if (pool.length > 1 && lastLine) pool = pool.filter(function (x) { return x.t !== lastLine; });
     line = pool[Math.floor(Math.random() * pool.length)];
     used.push(line.t); lastLine = line.t; store(K_BAN, ban);
-    return line;
+    var filled = {}, fk; for (fk in line) filled[fk] = line[fk];
+    var who = rvWho || ((typeof RVBook !== 'undefined' && RVBook.owner()) ? RVBook.owner().name : '');
+    filled.t = RVHeat.fill(line.t, who, rvWinner || who); return filled;
   }
   function chance(p) { return Math.random() < p; }
   // Big moments always get a line. Everything else gets one every 7 to 11 scores.
@@ -1032,7 +1139,7 @@ var RVBook = (function () {
   function applyLines(o) {
     if (!o || !o.lines) return false;
     var ok = false;
-    Object.keys(o.lines).forEach(function (g) { if (Array.isArray(o.lines[g]) && o.lines[g].length) { LINES[g] = o.lines[g]; ok = true; } });
+    Object.keys(o.lines).forEach(function (g) { if (Array.isArray(o.lines[g]) && o.lines[g].length) { LINES[g] = o.lines[g]; ok = true; } }); RVHeat.merge(LINES);
     return ok;
   }
   function note(msg) {
@@ -1246,6 +1353,12 @@ var RVBook = (function () {
   $('hear').addEventListener('click', function () { say('Full house. Nicely done.'); });
   $('resetSet').addEventListener('click', function () { settings = defaults(); applyTheme(); saveSet(); wake(); buzz(15); });
   Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.addEventListener('click', hide); });
+
+  /* ---- ribbing dial ---- */
+  var HEAT_HINT = { gentle: 'Brags and table talk only. Nobody gets picked on.', family: 'Jabs for everybody, nobody singled out by name.', savage: 'Everything, names included. House default.' };
+  function paintHeat() { var lvl = RVHeat.get(); Array.prototype.forEach.call(document.querySelectorAll('[data-heat-set]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-heat-set') === lvl ? 'true' : 'false'); }); var h = document.getElementById('heatHint'); if (h) h.textContent = HEAT_HINT[lvl]; }
+  function setHeat(v) { RVHeat.set(v); paintHeat(); }
+  paintHeat();
   /* ---- record book ---- */
   var lastSavedId = null, undoBookId = null;
   function bookSave(total) {
@@ -1299,7 +1412,7 @@ var RVBook = (function () {
   bookLine();
   if (!RVBook.owner()) { var nmT = setInterval(function () { if (document.getElementById('splash')) return; clearInterval(nmT); setTimeout(function () { if (!RVBook.owner() && !openSheet) askName(false); }, 400); }, 300); }
 
-  $('bSet').addEventListener('click', function () { loadVoices(); bookLine(); show('setSheet'); });
+  $('bSet').addEventListener('click', function () { loadVoices(); bookLine(); paintHeat(); show('setSheet'); });
   $('bDice').addEventListener('click', function () { settings.dice = !settings.dice; saveSet(); });
   $('roll').addEventListener('click', doRoll);
 
@@ -1353,6 +1466,7 @@ var RVBook = (function () {
     if (b.hasAttribute('data-preset')) { var p = PRESETS[b.getAttribute('data-preset')]; if (p) { for (var kk in p) settings[kk] = p[kk]; saveSet(); tone(640, 0.06, 'triangle'); } return; }
     if (b.hasAttribute('data-joker')) { settings.joker = b.getAttribute('data-joker'); saveSet(); return; }
     if (b.hasAttribute('data-vstyle')) { settings.vstyle = b.getAttribute('data-vstyle'); saveSet(); say('Full house. Nicely done.'); return; }
+    if (b.hasAttribute('data-heat-set')) { setHeat(b.getAttribute('data-heat-set')); buzz(); return; }
     if (b.hasAttribute('data-theme-set')) { settings.theme = b.getAttribute('data-theme-set'); applyTheme(); saveSet(); return; }
     if (b.id === 'clearStats') {
       if (!armed) { armed = true; b.textContent = 'Tap again to clear'; armT = setTimeout(function () { armed = false; b.textContent = 'Clear best score and games'; }, 4000); return; }
